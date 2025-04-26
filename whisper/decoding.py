@@ -758,12 +758,15 @@ class DecodingTask:
         if self.return_n_best:
             # I assume that tokens.shape[0] = 1
             tokens_seq = tokens[0]
-            texts = []
+            
+            
             sum_logprobs_seq = sum_logprobs[0]  # Get logprobs for the first (and only) audio sample
             avg_logprobs = []
+            tokens_ = []
 
             for tokens, seq_logprobs in zip(tokens_seq, sum_logprobs_seq):
                 texts.append(tokenizer.decode(tokens).strip())
+                tokens_.append([tokenizer.decode([t]) for t in tokens])
                 # Calculate average logprob: sum of logprobs divided by sequence length (including EOS token)
                 avg_logprob = seq_logprobs / (len(tokens) + 1)
                 avg_logprobs.append(avg_logprob)
@@ -776,13 +779,14 @@ class DecodingTask:
                     audio_features=audio_features,
                     language=languages[0],
                     tokens=tokens,
+                    tokens_= t_,
                     text=text,
                     avg_logprob=avg_logprob,  # Now using the calculated average logprob
                     no_speech_prob=no_speech_probs[0],
                     temperature=self.options.temperature,
                     compression_ratio=compression_ratio(text),
                 )
-                for text, tokens, avg_logprob in zip(texts, tokens_seq, avg_logprobs)
+                for text, tokens,t_, avg_logprob in zip(texts, tokens_seq, tokens_, avg_logprobs)
             ]
 
         # select the top-ranked sample in each group
@@ -799,6 +803,7 @@ class DecodingTask:
             texts,
             languages,
             tokens,
+            tokens_,
             audio_features,
             avg_logprobs,
             no_speech_probs,
@@ -811,6 +816,7 @@ class DecodingTask:
                 audio_features=features,
                 language=language,
                 tokens=tokens,
+                tokens_=tokens_,
                 text=text,
                 avg_logprob=avg_logprob,
                 no_speech_prob=no_speech_prob,
