@@ -123,6 +123,7 @@ class DecodingResult:
     language: str
     language_probs: Optional[Dict[str, float]] = None
     tokens: List[int] = field(default_factory=list)
+    tokens_: List[int] = field(default_factory=list)
     text: str = ""
     avg_logprob: float = np.nan
     no_speech_prob: float = np.nan
@@ -758,7 +759,7 @@ class DecodingTask:
         if self.return_n_best:
             # I assume that tokens.shape[0] = 1
             tokens_seq = tokens[0]
-            
+            texts = [] 
             
             sum_logprobs_seq = sum_logprobs[0]  # Get logprobs for the first (and only) audio sample
             avg_logprobs = []
